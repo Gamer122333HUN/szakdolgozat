@@ -48,13 +48,25 @@ def showGraph():
     plt.show()
 
 def createLayer():
-    name = f"new_{layer.name()}"
-    crs = layer.crs()
-    geometry = layer.geometry()
+    layer_name = f"new_{layer.name()}"
+    crs = "EPSG:3857"
+    geometry = "Polygon"
+
+    new_layer = QgsVectorLayer(f"{geometry}?crs={crs}", layer_name, "memory")
+    pr = new_layer.dataProvider()
+
+    pr.addAttributes([
+        QgsField("id", QVariant.Int)
+    ])
+    new_layer.updateFields()
+    QgsProject.instance().addMapLayer(new_layer)
+
+#def mergeCompatible():
+
 
 # Beállítások
-max_distance_for_graph = 100000  # Maximális éltávolság méterben a gráfhoz adáshoz
-max_distance_for_merge = 10000  # Maximális éltávolság méterben az összeolvasztáshoz
+max_distance_for_graph = 30000  # Maximális éltávolság méterben a gráfhoz adáshoz
+max_distance_for_merge = 5000  # Maximális éltávolság méterben az összeolvasztáshoz
 feet = 0.3048   # láb váltószáma
 
 # Réteg betöltése
@@ -65,12 +77,8 @@ features = list(layer.getFeatures())
 graph = nx.Graph()
 spatial_index = QgsSpatialIndex()
 distances = []
-
 createGraph()
-
-
-
-
+#createLayer()
 stats()
 showGraph()
 
