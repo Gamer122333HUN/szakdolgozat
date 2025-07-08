@@ -24,9 +24,13 @@ def createGraph():
             geom2 = features[k].geometry()
             shortest_line = geom1.shortestLine(geom2)
             distance = shortest_line.length() #*feet
-            distances.append(distance)
+            geom1c = geom1.buffer(distance, 20)
+            geom2c = geom2.buffer(distance, 20)
+            intersection=geom1c.intersection(geom2c)
+            area=intersection.area()/distance
+            distances.append(area)
             if distance < max_distance_for_graph:
-                graph.add_edge(features[i].id(), features[k].id(), weight=distance)
+                graph.add_edge(features[i].id(), features[k].id(), weight=area)
 
 def stats():
     print(f"CRS: {layer.crs()}")
@@ -52,6 +56,27 @@ def createLayer():
     crs = layer.crs()
     geometry = layer.geometry()
 
+
+def transformCRS():
+    target_crs = QgsCoordinateReferenceSystem("EPSG:3857")
+    output_path = "/tmp/layer_temp.shp"
+
+    error = QgsVectorFileWriter.writeAsVectorFormat(
+        input_layer,
+        output_path,
+        "UTF-8",
+        target_crs,
+        driverName="ESRI Shapefile"
+    )
+
+    if error == QgsVectorFileWriter.NoError:
+        layer = QgsVectorLayer(output_path, "Réteg EOV-ban", "ogr")
+        QgsProject.instance().addMapLayer(layer)
+        print("Sikeresen átalakítva és betöltve.")
+    else:
+        print("Hiba történt a mentés során.")
+    return layer
+
 # Beállítások
 max_distance_for_graph = 100000  # Maximális éltávolság méterben a gráfhoz adáshoz
 max_distance_for_merge = 10000  # Maximális éltávolság méterben az összeolvasztáshoz
@@ -59,6 +84,8 @@ feet = 0.3048   # láb váltószáma
 
 # Réteg betöltése
 layer = iface.activeLayer()
+#if layer.crs() is "EPSG:4326":
+#    layer = transformCRS()
 features = list(layer.getFeatures())
 
 # Gráf és térbeli index inicializálása
