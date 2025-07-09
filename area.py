@@ -27,7 +27,7 @@ def createGraph():
             geom1c = geom1.buffer(distance, 20)
             geom2c = geom2.buffer(distance, 20)
             intersection=geom1c.intersection(geom2c)
-            area=intersection.area()/distance
+            area=intersection.area()
             distances.append(area)
             if distance < max_distance_for_graph:
                 graph.add_edge(features[i].id(), features[k].id(), weight=area)
@@ -78,8 +78,8 @@ def transformCRS():
     return layer
 
 # Beállítások
-max_distance_for_graph = 100000  # Maximális éltávolság méterben a gráfhoz adáshoz
-max_distance_for_merge = 10000  # Maximális éltávolság méterben az összeolvasztáshoz
+max_distance_for_graph = 2  # Maximális éltávolság méterben a gráfhoz adáshoz
+max_distance_for_merge = 1  # Maximális éltávolság méterben az összeolvasztáshoz
 feet = 0.3048   # láb váltószáma
 
 # Réteg betöltése
