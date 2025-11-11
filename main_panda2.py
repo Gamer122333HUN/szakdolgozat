@@ -6,45 +6,55 @@ import matplotlib.pyplot as plt
 
 def process_shapefile(shapefile_path):
     g = gpd.read_file(shapefile_path)
-    return gpd.GeoSeries(g["geometry"])
+    return gpd.GeoSeries(g["geometry"]).to_crs("EPSG:3857")
 
 def createGraph():
+
+    centroid = gdf.centroid
     i = 0
-    for geom in gdf:
-        centroid = geom.centroid()
-        fid = i
-        graph.add_node(fid, pos=centroid)
+    for item in centroid:
+        graph.add_node(i, pos=(item.x, item.y))
 
         i+=1
 
+
     # Élek hozzáadása
-    for i in range(len(gdf) - 1):
-        for k in range(i + 1, len(gdf)):
-            shortest_line = gdf[i].shortestLine(gdf[k])
-            distance = shortest_line.length()
-            #distances.append(distance)
-            if distance < max_distance_for_graph:
-                graph.add_edge(i, k, weight=distance)
+    geoms = gdf.copy()
+
+    i=0
+    for item in gdf:
+        geoms = geoms.iloc[1:]
+        asd = geoms.distance(item, align=False)
+        k = 1
+        for item2 in asd:
+            if item2 < max_distance_for_graph:
+                graph.add_edge(i, k, weight=item2)
+            k+=1
+        i+=1
+
 
 def showGraph():
+
     pos = nx.get_node_attributes(graph, 'pos')
-    nx.draw(graph, pos, with_labels=False, node_size=20)
+    fig, ax = plt.subplots(figsize=(10, 10))
+
+    nx.draw(graph, pos, ax=ax, with_labels=True, node_size=20)
     rounded_labels = {
         (u, v): f"{d['weight']:.2f}"
         for u, v, d in graph.edges(data=True)
     }
-    labels = nx.get_edge_attributes(graph, 'weight')
-    nx.draw_networkx_edge_labels(graph, pos, edge_labels=rounded_labels)
+
+    #labels = nx.get_edge_attributes(graph, 'weight')
+    #nx.draw_networkx_edge_labels(graph, pos, edge_labels=rounded_labels)
+    gdf.plot(ax=ax, markersize=500, zorder=1)
     plt.show()
 
-def showMap():
-    gdf.plot()
-    plt.show()
+#shapefile_path = "asd.shp"űs
 
-shapefile_path = "asd.shp"
+shapefile_path = "shapefiles/alaska/trees.shp"
 gdf = process_shapefile(shapefile_path)
 graph = nx.Graph()
-max_distance_for_graph = 3000
+max_distance_for_graph = 50000
 
 
 
@@ -53,6 +63,6 @@ max_distance_for_graph = 3000
 process_shapefile(shapefile_path)
 createGraph()
 showGraph()
-showMap()
+print(graph)
 
 
