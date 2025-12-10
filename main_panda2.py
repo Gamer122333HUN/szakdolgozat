@@ -22,20 +22,23 @@ def createGraph():
 
         i+=1
 
-
     # Élek hozzáadása
-    geoms = gdf["geometry"].copy()
-
     i=0
     for item in gdf["geometry"]:
-        geoms = geoms.iloc[1:]
+        geoms = gdf["geometry"].copy()
+        geoms = geoms.iloc[i+1:]
         asd = geoms.distance(item, align=False)
-        k = 1
+        k = i+1
         for item2 in asd:
             if item2 < max_distance_for_graph:
                 graph.add_edge(i, k, weight=item2)
             k+=1
         i+=1
+
+
+
+def merge_polygons():
+    return
 
 
 def showGraph_plotter():
@@ -49,9 +52,9 @@ def showGraph_plotter():
         for u, v, d in graph.edges(data=True)
     }
 
-    #labels = nx.get_edge_attributes(graph, 'weight')
-    #nx.draw_networkx_edge_labels(graph, pos, edge_labels=rounded_labels)
-    gdf.plot(ax=ax, markersize=500, zorder=1)
+    labels = nx.get_edge_attributes(graph, 'weight')
+    nx.draw_networkx_edge_labels(graph, pos, edge_labels=rounded_labels)
+    #gdf.plot(ax=ax, markersize=500, zorder=1)
     plt.show()
 
 def showGraph_plotly():
@@ -87,7 +90,7 @@ def showGraph_plotly():
         mapbox_center={"lat": gdf.geometry.centroid.y.mean(), "lon": gdf.geometry.centroid.x.mean()},
         margin={"r": 0, "t": 0, "l": 0, "b": 0}
     )
-    print("poligonok darabszáma: ", polygondb)
+    print("megrajzolt poligonok darabszáma: ", polygondb)
     fig.show()
 
 
@@ -96,19 +99,22 @@ start = time.time()
 #shapefile_path = "asd.shp"
 #shapefile_path = "shapefiles/alaska/trees.shp"
 #shapefile_path = "shapefiles/andorra/gadm41_AND_1.shp"
-#shapefile_path = "shapefiles/hungary/gadm41_HUN_2.shp"
-shapefile_path = "shapefiles/bahamas/gadm41_BHS_1.shp"
-gdf = process_shapefile(shapefile_path)
+shapefile_path = "shapefiles/hungary/gadm41_HUN_2.shp"
+#shapefile_path = "shapefiles/bahamas/gadm41_BHS_1.shp"
+#shapefile_path = "shapefiles/cabo_verde/gadm41_CPV_1.shp"
+#gdf = process_shapefile(shapefile_path)
+gdf = gpd.read_file("szeged.geojson")
 graph = nx.Graph()
-max_distance_for_graph = 10
+max_distance_for_graph = 1
 
 
 
 
 createGraph()
-#showGraph_plotter()
+showGraph_plotter()
 showGraph_plotly()
 print(graph)
+
 
 end = time.time()
 print(f"Futási idő: {end - start:.3f} másodperc")
