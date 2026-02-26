@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 
 
+
 def remove_Points():
     pattern = r"^node.*"
     szamok = []
@@ -24,9 +25,11 @@ def createGraph():
             graph.add_node(gdf.iloc[i]['id'], pos=(centroid[i].x, centroid[i].y))
 
     # Élek hozzáadása
-    '''i=0
-    for item in gdf["geometry"]:
-        geoms = gdf["geometry"].copy()
+    for i in range(0, len(gdf["id"])-1):
+        geom = gpd.GeoSeries(gdf.iloc[i]['geometry'])
+        print(geom.buffer(0.0003))
+
+        '''geoms = gdf["geometry"].copy()
         geoms = geoms.iloc[i+1:]
         asd = geoms.distance(item, align=False)
         k = i+1
@@ -52,13 +55,18 @@ def showGraph_plotter():
     #gdf.plot(ax=ax, markersize=500, zorder=1)
     plt.show()
 
+def showMap():
+    gdf.plot()
+    plt.show()
 
-
+def teszt():
+    gdf2 = gpd.GeoDataFrame({"id",})
 
 
 
 graph = nx.Graph()
-gdf = gpd.read_file("szegedk.geojson")
-remove_Points()
-createGraph()
-showGraph_plotter()
+gdf = gpd.GeoDataFrame(gpd.read_file("szegednk.geojson"))
+#remove_Points()
+#createGraph()
+#showMap()
+#showGraph_plotter()
